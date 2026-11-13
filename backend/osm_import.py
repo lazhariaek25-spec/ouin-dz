@@ -153,7 +153,8 @@ def save_pg(rows, dsn):
 def save_sqlite(rows, path):
     con = sqlite3.connect(path)
     con.executescript(SQLITE_SCHEMA)
-    con.executemany("INSERT OR REPLACE INTO places VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+    con.executemany("INSERT OR REPLACE INTO places (osm_id,wilaya,sector,subtype,name,name_ar,name_fr,"
+                    "phone,opening_hours,website,address,lat,lon) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
     con.commit()
     con.close()
 

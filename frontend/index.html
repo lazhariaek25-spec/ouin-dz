@@ -44,7 +44,7 @@ footer{margin-top:24px;text-align:center}
 </head>
 <body>
 <div class="w">
-<header><div class="logo" id="brand"></div><div class="lang"><button data-l="ar">ع</button> <button data-l="fr">FR</button> <button data-l="en">EN</button></div></header>
+<header><div class="logo" id="brand"></div><div><a href="/business.html" id="biz" style="color:var(--pri);margin-inline-end:10px;text-decoration:none"></a><span class="lang"><button data-l="ar">ع</button> <button data-l="fr">FR</button> <button data-l="en">EN</button></span></div></header>
 <h1 id="t1"></h1><p class="sub" id="t2"></p>
 <div class="tabs"><button id="tb1"></button><button id="tb2"></button></div>
 
@@ -74,7 +74,7 @@ function sl(x){return x[lg==="ar"?2:lg==="fr"?3:4]}
 function card(e){var t=L[lg],nm=lg==="ar"?(e.name_ar||e.name):(e.name_fr||e.name),
 u="https://www.openstreetmap.org/?mlat="+e.lat+"&mlon="+e.lon+"#map=18/"+e.lat+"/"+e.lon,
 s=S.filter(function(x){return x[0]===e.sector})[0];
-return '<div class="r"><div><b>'+esc(nm)+'</b><span class="m">'+(s?s[1]+" "+sl(s):"")+" · "+esc(e.subtype)+(e.km!=null?" · "+e.km+" "+t.km:"")+'</span>'+
+return '<div class="r"><div><b>'+esc(nm)+(e.source==="owner"?' <span style="color:var(--pri)">✔</span>':"")+'</b><span class="m">'+(s?s[1]+" "+sl(s):"")+" · "+esc(e.subtype)+(e.km!=null?" · "+e.km+" "+t.km:"")+'</span>'+
 (e.address?'<span class="m">'+esc(e.address)+'</span>':"")+
 (e.phone?'<span class="m"><a href="tel:'+esc(e.phone)+'">'+esc(e.phone)+'</a></span>':"")+
 (e.opening_hours?'<span class="m">🕒 '+esc(e.opening_hours)+'</span>':"")+
@@ -90,7 +90,7 @@ show(d.length?d.map(card).join(""):'<p class="note">'+t.none+'</p>')}).catch(fun
 function later(){clearTimeout(tm);tm=setTimeout(run,300)}
 function build(){var t=L[lg];document.documentElement.lang=lg;document.documentElement.dir=t.dir;document.title=t.brand;
 ["brand","t1","t2","h1","h2","h3","ft"].forEach(function(k){$(k).textContent=t[k]});
-$("tb1").textContent=t.tb1;$("tb2").textContent=t.tb2;$("sq").placeholder=t.ph1;$("s").placeholder=t.ph2;$("near").textContent=t.near;
+$("biz").textContent={ar:"🏢 للمؤسسات",fr:"🏢 Entreprises",en:"🏢 Business"}[lg];$("tb1").textContent=t.tb1;$("tb2").textContent=t.tb2;$("sq").placeholder=t.ph1;$("s").placeholder=t.ph2;$("near").textContent=t.near;
 $("tb1").className=md===1?"on":"";$("tb2").className=md===2?"on":"";$("m1").className=md===1?"":"hid";$("m2").className=md===2?"":"hid";
 $("near").className="near"+(pos?" on":"");
 $("wil").innerHTML=W.map(function(x){return '<button class="wb'+(wi===x[0]?' on':'')+'" data-c="'+x[0]+'"><em>'+x[0]+'</em>'+(lg==="ar"?x[1]:x[2])+'</button>'}).join("");

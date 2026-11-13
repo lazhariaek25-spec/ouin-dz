@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة المؤسسات — وين؟ DZ</title>
+<style>
+:root{--bg:#f6f8f7;--card:#fff;--ink:#14201b;--mut:#5b6b64;--line:#dfe7e3;--pri:#0b7a4b;--pri2:#e8f5ee;--acc:#d62f3a;--warn:#b7791f}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1512;--card:#16201b;--ink:#e8f0ec;--mut:#9ab0a6;--line:#263530;--pri:#3ddc97;--pri2:#173026;--warn:#e0b050;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;line-height:1.6}
+.w{max-width:760px;margin:0 auto;padding:0 16px 30px}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 0}
+.logo{font-weight:800;font-size:1.3rem;color:var(--pri)}
+a.lk{color:var(--pri);text-decoration:none}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{font-size:1.1rem;margin:14px 0 8px}
+label{display:block;font-size:.88rem;color:var(--mut);margin:8px 0 2px}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{border:0;background:var(--pri);color:#fff;border-radius:10px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
+button.s{background:transparent;color:var(--pri);border:1px solid var(--pri)}
+button.d{background:var(--acc)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.it{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.m{color:var(--mut);font-size:.88rem}
+.st{font-size:.78rem;border-radius:8px;padding:1px 8px;border:1px solid var(--line)}
+.st.pending{color:var(--warn);border-color:var(--warn)}.st.approved{color:var(--pri);border-color:var(--pri)}.st.rejected{color:var(--acc);border-color:var(--acc)}
+#msg{min-height:1.4em;font-size:.92rem}
+#msg.e{color:var(--acc)}#msg.o{color:var(--pri)}
+</style>
+</head>
+<body>
+<div class="w">
+<header><div class="logo">وين؟ DZ · لوحة المؤسسات</div><a class="lk" href="/">← الرئيسية</a></header>
+<div id="msg"></div>
+<div id="app"></div>
+</div>
+<script>
+var W="أدرار;الشلف;الأغواط;أم البواقي;باتنة;بجاية;بسكرة;بشار;البليدة;البويرة;تمنراست;تبسة;تلمسان;تيارت;تيزي وزو;الجزائر;الجلفة;جيجل;سطيف;سعيدة;سكيكدة;سيدي بلعباس;عنابة;قالمة;قسنطينة;المدية;مستغانم;المسيلة;معسكر;ورقلة;وهران;البيض;إليزي;برج بوعريريج;بومرداس;الطارف;تندوف;تيسمسيلت;الوادي;خنشلة;سوق أهراس;تيبازة;ميلة;عين الدفلى;النعامة;عين تموشنت;غرداية;غليزان;تيميمون;برج باجي مختار;أولاد جلال;بني عباس;عين صالح;عين قزام;تقرت;جانت;المغير;المنيعة".split(";");
+var S=[["health","الصحة"],["shopping","التجارة والتسوق"],["auto","النقل والسيارات"],["food","المطاعم والترفيه"],["trades","الحرف والخدمات"],["public","الإدارات والمرافق"],["education","التعليم والتكوين"],["realestate","العقارات والسكن"],["sport","الرياضة والشباب"],["finance","المال والتأمين"],["agriculture","الفلاحة"],["tourism","السياحة والسفر"]];
+var ST={pending:"قيد المراجعة",approved:"منشورة",rejected:"مرفوضة"};
+var me=null,mine=[],pend=[],edit=null,$=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function say(t,ok){var m=$("msg");m.textContent=t||"";m.className=t?(ok?"o":"e"):""}
+function api(m,u,b){return fetch(u,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d}})})}
+function load(){return api("GET","/api/me").then(function(r){me=r.d.user;if(!me)return;
+return api("GET","/api/my/places").then(function(x){mine=x.d||[]}).then(function(){if(me.is_admin)return api("GET","/api/admin/pending").then(function(x){pend=x.d||[]})})})}
+function opts(arr,sel,val){return arr.map(function(x,i){var v=val?x[0]:String(i+1).padStart(2,"0"),t=val?x[1]:(String(i+1).padStart(2,"0")+" · "+x);return '<option value="'+v+'"'+(sel===v?" selected":"")+'>'+t+'</option>'}).join("")}
+function authView(){return '<div class="box"><label>البريد الإلكتروني</label><input id="em" type="email" autocomplete="email"><label>كلمة السر (8 أحرف على الأقل)</label><input id="pw" type="password" autocomplete="current-password"><label>الاسم (للتسجيل فقط)</label><input id="nm"><div class="row"><button id="bl">دخول</button><button class="s" id="br">إنشاء حساب</button></div></div>'}
+function f(k){return edit&&edit[k]!=null?esc(edit[k]):""}
+function formView(){var e=edit||{};return '<div class="box"><h2>'+(edit?"تعديل المؤسسة":"إضافة مؤسسة")+'</h2><label>اسم المؤسسة *</label><input id="f_name" value="'+f("name")+'"><div class="g2"><div><label>الاسم بالعربية</label><input id="f_name_ar" value="'+f("name_ar")+'"></div><div><label>الاسم بالفرنسية</label><input id="f_name_fr" value="'+f("name_fr")+'"></div></div><div class="g2"><div><label>الولاية *</label><select id="f_wilaya">'+opts(W,e.wilaya)+'</select></div><div><label>القطاع *</label><select id="f_sector">'+opts(S,e.sector,1)+'</select></div></div><label>التخصص (مثال: طبيب أسنان، سباك، مخبزة)</label><input id="f_subtype" value="'+f("subtype")+'"><label>العنوان</label><input id="f_address" value="'+f("address")+'"><div class="g2"><div><label>الهاتف</label><input id="f_phone" inputmode="tel" value="'+f("phone")+'"></div><div><label>ساعات العمل</label><input id="f_opening_hours" placeholder="08:00-18:00" value="'+f("opening_hours")+'"></div></div><label>الموقع الإلكتروني (اختياري)</label><input id="f_website" placeholder="https://" value="'+f("website")+'"><div class="g2"><div><label>خط العرض *</label><input id="f_lat" inputmode="decimal" value="'+f("lat")+'"></div><div><label>خط الطول *</label><input id="f_lon" inputmode="decimal" value="'+f("lon")+'"></div></div><div class="row"><button class="s" id="geo">📡 استخدم موقعي الحالي</button></div><p class="m">قف في مكان المؤسسة ثم اضغط الزر لتعبئة الإحداثيات. تظهر المؤسسة للجمهور بعد مراجعة الإدارة.</p><div class="row"><button id="save">حفظ</button>'+(edit?'<button class="s" id="cancel">إلغاء</button>':"")+'</div></div>'}
+function listView(){if(!mine.length)return '<p class="m">لا مؤسسات بعد.</p>';return mine.map(function(p){return '<div class="box it"><div><b>'+esc(p.name)+'</b> <span class="st '+esc(p.status)+'">'+(ST[p.status]||p.status)+'</span><div class="m">'+esc(p.address||"")+' '+esc(p.phone||"")+'</div></div><div class="row" style="margin:0"><button class="s" data-e="'+esc(p.osm_id)+'">تعديل</button><button class="d" data-d="'+esc(p.osm_id)+'">حذف</button></div></div>'}).join("")}
+function adminView(){if(!me.is_admin)return"";return '<h2>مراجعة الإدارة ('+pend.length+')</h2>'+(pend.length?pend.map(function(p){return '<div class="box"><b>'+esc(p.name)+'</b><div class="m">'+esc(p.address||"")+' · '+esc(p.phone||"")+' · '+esc(p.sector)+' · الولاية '+esc(p.wilaya)+'<br>المالك: '+esc(p.owner)+'</div><div class="row"><button data-a="approve" data-i="'+esc(p.osm_id)+'">قبول</button><button class="d" data-a="reject" data-i="'+esc(p.osm_id)+'">رفض</button></div></div>'}).join(""):'<p class="m">لا طلبات معلّقة.</p>')}
+function render(){var a=$("app");if(!me){a.innerHTML=authView();return}
+a.innerHTML='<div class="box it"><span>'+esc(me.email)+(me.is_admin?" · مدير":"")+'</span><button class="s" id="out">خروج</button></div>'+formView()+'<h2>مؤسساتي</h2>'+listView()+adminView()}
+function val(k){return $("f_"+k).value.trim()}
+function body(){var o={};["name","name_ar","name_fr","wilaya","sector","subtype","address","phone","opening_hours","website","lat","lon"].forEach(function(k){o[k]=val(k)});return o}
+function refresh(){return load().then(render)}
+document.addEventListener("click",function(e){var t=e.target.closest("button");if(!t)return;say("");
+if(t.id==="bl"||t.id==="br"){var reg=t.id==="br";api("POST",reg?"/api/register":"/api/login",{email:$("em").value,password:$("pw").value,name:$("nm").value}).then(function(r){r.ok?refresh():say(r.d.error)});return}
+if(t.id==="out"){api("POST","/api/logout").then(function(){me=null;edit=null;render()});return}
+if(t.id==="geo"){if(!navigator.geolocation){say("المتصفح لا يدعم تحديد الموقع");return}navigator.geolocation.getCurrentPosition(function(g){$("f_lat").value=g.coords.latitude.toFixed(6);$("f_lon").value=g.coords.longitude.toFixed(6);say("تم تحديد الموقع",1)},function(){say("تعذر تحديد الموقع. فعّل الإذن أو أدخل الإحداثيات يدوياً")});return}
+if(t.id==="cancel"){edit=null;render();return}
+if(t.id==="save"){var u=edit?"/api/my/places/"+encodeURIComponent(edit.osm_id):"/api/my/places";api(edit?"PUT":"POST",u,body()).then(function(r){if(r.ok){edit=null;say("تم الحفظ، المؤسسة قيد المراجعة",1);refresh()}else say(r.d.error)});return}
+if(t.dataset.e){edit=mine.filter(function(p){return p.osm_id===t.dataset.e})[0];render();scrollTo(0,0);return}
+if(t.dataset.d){if(confirm("حذف هذه المؤسسة؟"))api("DELETE","/api/my/places/"+encodeURIComponent(t.dataset.d)).then(refresh);return}
+if(t.dataset.a){api("POST","/api/admin/places/"+encodeURIComponent(t.dataset.i)+"/"+t.dataset.a).then(refresh)}});
+refresh();
+</script>
+</body>
+</html>

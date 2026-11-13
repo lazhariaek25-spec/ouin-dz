@@ -4,6 +4,8 @@
 
 - **backend/osm_import.py**: يجلب أماكن حقيقية من OpenStreetMap لولاية معينة (SQLite أو PostgreSQL/PostGIS).
 - **backend/app.py**: واجهة API (Flask): `/api/places?wilaya=31&sector=health&q=أسنان&lat=..&lon=..` و`/api/stats`.
+- **frontend/business.html**: لوحة المؤسسات (تسجيل، إضافة وتعديل الأنشطة، ومراجعة الإدارة).
+- **DEPLOY.md**: النشر العام على PythonAnywhere.
 - **frontend/index.html**: الواجهة (عربي/فرنسي/إنجليزي): بحث حسب الولاية والقطاع والتخصص، أو بحث عام بالاسم، مع العنوان والموقع.
 
 ## التشغيل على Termux

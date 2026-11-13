@@ -1,4 +1,5 @@
 __pycache__/
 *.pyc
-data/*.db
+data/ouin.db
+data/secret.key
 .env
