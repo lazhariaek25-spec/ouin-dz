@@ -3,3 +3,6 @@ __pycache__/
 data/ouin.db
 data/secret.key
 .env
+_site/
+android/app/ouin.keystore
+frontend/downloads/*.apk

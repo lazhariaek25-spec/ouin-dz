@@ -30,3 +30,7 @@ bash push_github.sh ouin-dz
 - `/` صفحة هبوط: زر «افتح في المتصفح» (`/app`) وزر «حمّل APK» (يظهر عند وجود الملف) وزر تثبيت كتطبيق ويب.
 - `android/`: تطبيق WebView يفتح `APP_URL/app`. يبنيه GitHub Actions (`.github/workflows/android.yml`) ويحفظ الناتج في `frontend/downloads/ouin-dz.apk`.
 - التشغيل: GitHub ثم Actions ثم Build APK ثم Run workflow ثم أدخل رابط المنصة العام.
+
+## الموقع الثابت (GitHub Pages) — بلا خادم
+`static_site/` + `tools/build_site.py` + `.github/workflows/site.yml`: يجلب GitHub بيانات OSM ويبني الموقع والـAPK وينشرهما على
+`https://<حسابك>.github.io/<المستودع>/`. البحث يعمل داخل المتصفح (`search.js`). لوحة المؤسسات تحتاج الخادم (Flask).

@@ -1,0 +1,88 @@
+name: Build site and APK
+on:
+  workflow_dispatch:
+    inputs:
+      wilayas:
+        description: "رموز الولايات لتحديث بياناتها من OpenStreetMap (مفصولة بمسافة)"
+        required: false
+        default: "16 22 31"
+  push:
+    branches: [main]
+    paths: ["static_site/**", "tools/**", "backend/**", "android/**", ".github/workflows/site.yml", "data/osm_seed.db"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: url
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"; REPO="${GITHUB_REPOSITORY#*/}"
+          echo "u=https://${OWNER}.github.io/${REPO}/app.html" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: "8.9" }
+      - name: مفتاح التوقيع
+        run: |
+          keytool -genkeypair -keystore android/app/ouin.keystore -storepass android -keypass android \
+            -alias ouin -keyalg RSA -keysize 2048 -validity 36500 -dname "CN=Ouin DZ"
+      - name: بناء APK
+        env:
+          APP_URL: ${{ steps.url.outputs.u }}
+        run: cd android && gradle assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ouin-dz-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+  site:
+    needs: apk
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install requests
+      - name: بيانات OpenStreetMap
+        env:
+          W: ${{ inputs.wilayas || '16 22 31' }}
+        run: |
+          if [ -f data/osm_seed.db ]; then cp data/osm_seed.db data/ouin.db; fi
+          for c in $W; do
+            python backend/osm_import.py --wilaya "$c" --sqlite data/ouin.db || echo "تعذر تحديث الولاية $c"
+          done
+      - run: python tools/build_site.py
+      - name: إضافة APK
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: ouin-dz-apk
+          path: apk-dl
+      - run: |
+          mkdir -p _site/downloads
+          if [ -f apk-dl/app-release.apk ]; then cp apk-dl/app-release.apk _site/downloads/ouin-dz.apk; fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+
+  deploy:
+    needs: site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.d.outputs.page_url }}
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4

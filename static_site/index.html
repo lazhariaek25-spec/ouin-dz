@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>وين؟ DZ — كل ما تبحث عنه حولك، بذكاء</title>
+<meta name="description" content="المنصة الوطنية الجزائرية للبحث الجغرافي الذكي: أطباء، صيدليات، مطاعم، ورش وخدمات في كل الولايات.">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b7a4b"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#f6f8f7;--card:#fff;--ink:#14201b;--mut:#5b6b64;--line:#dfe7e3;--pri:#0b7a4b;--pri2:#e8f5ee;--acc:#d62f3a;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1512;--card:#16201b;--ink:#e8f0ec;--mut:#9ab0a6;--line:#263530;--pri:#3ddc97;--pri2:#173026;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;line-height:1.7}
+.w{max-width:880px;margin:0 auto;padding:0 18px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.4rem;color:var(--pri)}
+.logo img{width:36px;height:36px;border-radius:10px}
+.lang button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:4px 10px;font:inherit;cursor:pointer}
+.lang button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.hero{text-align:center;padding:34px 0 22px}
+h1{font-size:clamp(1.9rem,7vw,3.2rem);line-height:1.2;margin:0 0 10px}
+h1 span{color:var(--pri)}
+.sub{color:var(--mut);font-size:1.05rem;max-width:560px;margin:0 auto 26px}
+.btns{display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto}
+.b{display:block;padding:14px 18px;border-radius:14px;font:inherit;font-weight:700;font-size:1.05rem;text-decoration:none;text-align:center;cursor:pointer;border:2px solid var(--pri)}
+.b.p{background:var(--pri);color:#fff}
+.b.s{background:transparent;color:var(--pri)}
+.b[hidden]{display:none}
+.hint{color:var(--mut);font-size:.85rem;margin-top:10px}
+h2{text-align:center;font-size:1.4rem;margin:44px 0 16px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.c h3{margin:0 0 4px;font-size:1.05rem;color:var(--pri)}
+.c p{margin:0;color:var(--mut);font-size:.95rem}
+.sec{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.sec span{background:var(--pri2);border-radius:999px;padding:5px 14px;font-size:.92rem}
+.steps{counter-reset:s;list-style:none;padding:0;max-width:520px;margin:0 auto}
+.steps li{counter-increment:s;position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 52px 12px 14px;margin-bottom:8px}
+[dir=ltr] .steps li{padding:12px 14px 12px 52px}
+.steps li::before{content:counter(s);position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:12px;width:28px;height:28px;border-radius:50%;background:var(--pri);color:#fff;display:grid;place-items:center;font-weight:700}
+footer{text-align:center;color:var(--mut);font-size:.85rem;padding:36px 0 26px}
+footer a{color:var(--pri)}
+</style>
+</head>
+<body>
+<div class="w">
+<nav><div class="logo"><img src="icon-192.png" alt=""><span id="brand"></span></div>
+<div class="lang"><button data-l="ar">ع</button> <button data-l="fr">FR</button> <button data-l="en">EN</button></div></nav>
+
+<section class="hero">
+<h1 id="h1"></h1><p class="sub" id="sub"></p>
+<div class="btns">
+<a class="b p" id="web" href="app.html"></a>
+<a class="b s" id="apk" href="downloads/ouin-dz.apk" download hidden></a>
+<button class="b s" id="pwa" hidden></button>
+</div>
+<p class="hint" id="hint"></p>
+</section>
+
+<h2 id="t1"></h2><div class="sec" id="sec"></div>
+<h2 id="t2"></h2><div class="g" id="feat"></div>
+<h2 id="t3"></h2><ol class="steps" id="steps"></ol>
+<footer><div id="ft"></div><div style="margin-top:4px">© <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a></div></footer>
+</div>
+
+<script>
+var L={
+ar:{dir:"rtl",brand:"وين؟ DZ",h1:"كل ما تبحث عنه <span>حولك</span>، بذكاء.",sub:"المنصة الوطنية الجزائرية للبحث الجغرافي الذكي: أطباء وصيدليات ومطاعم وورش وخدمات في ولايتك، على الخريطة وبثلاث لغات.",web:"🌐 افتح في المتصفح",apk:"📲 حمّل تطبيق أندرويد (APK)",pwa:"⬇️ ثبّت كتطبيق ويب",hint:"للـAPK: بعد التحميل اسمح بالتثبيت من هذا المصدر في إعدادات هاتفك.",t1:"القطاعات",sec:["الصحة","التجارة والتسوق","النقل والسيارات","المطاعم والترفيه","الحرف والخدمات","الإدارات والمرافق","التعليم والتكوين","العقارات والسكن","الرياضة والشباب","المال والتأمين","الفلاحة","السياحة والسفر"],t2:"لماذا وين؟",feat:[["بحث ذكي","اكتب «طبيب» أو «صيدلي» أو «hôpital» بالعربية أو الفرنسية أو الإنجليزية، فتصلك النتائج المناسبة."],["الأقرب إليك","رتّب النتائج حسب قربها من موقعك، مع العنوان والهاتف وساعات العمل وزر الخريطة."],["بيانات حقيقية","من خرائط OpenStreetMap وتُحدَّث دورياً، وتعمل البحث حتى بلا اتصال بعد أول زيارة."],["مجاني للمواطن","بلا اشتراكات ولا بيع بيانات. والإعلانات موسومة ولا تؤثر في الترتيب."]],t3:"كيف تبدأ؟",steps:["اختر ولايتك والقطاع، أو ابحث بالاسم مباشرة.","اكتب كلمة مثل: صيدلية، مستشفى، ميكانيكي، فندق.","افتح العنوان على الخريطة أو اتصل بالمؤسسة."],ft:"وين؟ DZ — مجاني للمواطن، ومستدام بالإعلانات."},
+fr:{dir:"ltr",brand:"Ouin ? DZ",h1:"Tout ce que vous cherchez, <span>autour de vous</span>, intelligemment.",sub:"La plateforme nationale algérienne de recherche géographique intelligente : médecins, pharmacies, restaurants, artisans et services de votre wilaya, sur la carte et en trois langues.",web:"🌐 Ouvrir dans le navigateur",apk:"📲 Télécharger l’appli Android (APK)",pwa:"⬇️ Installer comme appli web",hint:"APK : après le téléchargement, autorisez l’installation depuis cette source dans les réglages.",t1:"Secteurs",sec:["Santé","Commerce","Auto et transport","Restauration","Artisans","Administrations","Éducation","Immobilier","Sport et jeunesse","Finance et assurance","Agriculture","Tourisme"],t2:"Pourquoi Ouin ?",feat:[["Recherche intelligente","Tapez « médecin », « صيدلي » ou « hôpital » dans la langue de votre choix."],["Au plus près","Résultats classés par distance, avec adresse, téléphone, horaires et carte."],["Données réelles","OpenStreetMap, mises à jour régulièrement ; la recherche fonctionne même hors ligne après la première visite."],["Gratuit pour les citoyens","Ni abonnement, ni revente de données. Les annonces sont signalées."]],t3:"Comment commencer ?",steps:["Choisissez votre wilaya et un secteur, ou cherchez un nom.","Tapez : pharmacie, hôpital, garage, hôtel…","Ouvrez l’adresse sur la carte ou appelez."],ft:"Ouin ? DZ — gratuit pour les citoyens, financé par la publicité."},
+en:{dir:"ltr",brand:"Win? DZ",h1:"Everything you look for, <span>around you</span>, intelligently.",sub:"Algeria’s national smart geographic search platform: doctors, pharmacies, restaurants, trades and services in your wilaya, on the map and in three languages.",web:"🌐 Open in browser",apk:"📲 Download Android app (APK)",pwa:"⬇️ Install as web app",hint:"APK: after downloading, allow installing from this source in your phone settings.",t1:"Sectors",sec:["Health","Shopping","Transport & cars","Food & leisure","Trades","Public services","Education","Real estate","Sports & youth","Finance","Agriculture","Tourism"],t2:"Why Win?",feat:[["Smart search","Type “doctor”, “صيدلي” or “hôpital” in Arabic, French or English."],["Closest first","Results ranked by distance, with address, phone, hours and a map button."],["Real data","OpenStreetMap, updated regularly; search keeps working offline after the first visit."],["Free for citizens","No subscriptions, no selling data. Ads are labelled."]],t3:"Get started",steps:["Pick your wilaya and a sector, or search by name.","Type: pharmacy, hospital, mechanic, hotel…","Open the address on the map or call."],ft:"Win? DZ — free for citizens, sustained by ads."}};
+var lg="ar",$=function(i){return document.getElementById(i)};
+function build(){var t=L[lg];document.documentElement.lang=lg;document.documentElement.dir=t.dir;
+$("brand").textContent=t.brand;$("h1").innerHTML=t.h1;
+["sub","web","apk","pwa","hint","t1","t2","t3","ft"].forEach(function(k){$(k).textContent=t[k]});
+$("sec").innerHTML=t.sec.map(function(x){return "<span>"+x+"</span>"}).join("");
+$("feat").innerHTML=t.feat.map(function(x){return '<div class="c"><h3>'+x[0]+"</h3><p>"+x[1]+"</p></div>"}).join("");
+$("steps").innerHTML=t.steps.map(function(x){return "<li>"+x+"</li>"}).join("");
+document.querySelectorAll(".lang button").forEach(function(b){b.classList.toggle("on",b.dataset.l===lg)})}
+document.querySelectorAll(".lang button").forEach(function(b){b.onclick=function(){lg=b.dataset.l;build()}});
+fetch("downloads/ouin-dz.apk",{method:"HEAD"}).then(function(r){if(r.ok)$("apk").hidden=false}).catch(function(){});
+var dp=null;window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;$("pwa").hidden=false});
+$("pwa").onclick=function(){if(dp){dp.prompt();dp=null;$("pwa").hidden=true}};
+build();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>
