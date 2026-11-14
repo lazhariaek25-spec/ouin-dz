@@ -67,31 +67,28 @@ CREATE INDEX IF NOT EXISTS places_sector_idx ON places (wilaya, sector);
 """
 
 
-def build_query(code):
-    parts = []
-    for key, values in TAGS.items():
-        regex = "|".join(values)
-        parts.append(f'nwr["{key}"~"^({regex})$"](area.a);')
+def build_query(code, key):
+    regex = "|".join(TAGS[key])
     return (
         "[out:json][timeout:180];"
         f'area["ISO3166-2"="DZ-{code}"]["boundary"="administrative"]->.a;'
-        "(" + "".join(parts) + ");out center tags;"
+        f'nwr["{key}"~"^({regex})$"](area.a);out center tags;'
     )
 
 
 def fetch(query):
-    headers = {"User-Agent": "ouin-dz/1.0 (https://github.com/yakine1823/ouin-dz)", "Accept": "*/*"}
-    for attempt in range(3):
+    headers = {"User-Agent": "ouin-dz/1.0 (https://github.com/lazhariaek25-spec/ouin-dz)", "Accept": "*/*"}
+    for attempt in range(2):
         for url in ENDPOINTS:
             try:
                 r = requests.post(url, data={"data": query}, headers=headers, timeout=240)
                 if r.status_code == 200:
                     return r.json()["elements"]
-                print(f"{url} -> HTTP {r.status_code}", file=sys.stderr)
+                print(f"    {url.split('/')[2]} -> HTTP {r.status_code}", file=sys.stderr)
             except requests.RequestException as e:
-                print(f"{url} -> {e}", file=sys.stderr)
-        time.sleep(15 * (attempt + 1))
-    sys.exit("تعذر الوصول إلى Overpass. أعد المحاولة لاحقاً.")
+                print(f"    {url.split('/')[2]} -> {type(e).__name__}", file=sys.stderr)
+        time.sleep(10)
+    return None
 
 
 def classify(tags):
@@ -169,7 +166,19 @@ def main():
     code = a.wilaya.zfill(2)
 
     print(f"جلب بيانات الولاية {code} من OpenStreetMap ...")
-    rows = to_rows(fetch(build_query(code)), code)
+    els = {}
+    for key in TAGS:   # طلب صغير لكل نوع وسم: أنجح مع الولايات الكبيرة مثل الجزائر العاصمة
+        print(f"  - {key} ...", flush=True)
+        got = fetch(build_query(code, key))
+        if got is None:
+            print(f"    تعذّر جلب {key}؛ أعد تشغيل الأمر لاحقاً لإكماله", file=sys.stderr)
+            continue
+        for e in got:
+            els[(e["type"], e["id"])] = e
+        time.sleep(2)
+    if not els:
+        sys.exit("تعذر الوصول إلى Overpass. أعد المحاولة لاحقاً.")
+    rows = to_rows(list(els.values()), code)
     if not rows:
         sys.exit("لا نتائج. تحقق من رمز الولاية.")
 

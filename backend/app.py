@@ -10,6 +10,8 @@ import time
 from flask import Flask, jsonify, request, send_from_directory, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from search import norm, parse, score
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB = os.environ.get("OUIN_DB", os.path.join(ROOT, "data", "ouin.db"))
 SEED = os.path.join(ROOT, "data", "osm_seed.db")
@@ -67,6 +69,18 @@ def db():
     return con
 
 
+def ensure_ntext(con):
+    """يحسب النص الموحّد للبحث للسجلات الجديدة (بعد الاستيراد أو التعديل)."""
+    while True:
+        rows = con.execute("SELECT osm_id,name,name_ar,name_fr,subtype,address FROM places "
+                           "WHERE ntext IS NULL LIMIT 2000").fetchall()
+        if not rows:
+            break
+        con.executemany("UPDATE places SET ntext=? WHERE osm_id=?",
+                        [(norm(" ".join(str(x or "") for x in r[1:])), r[0]) for r in rows])
+        con.commit()
+
+
 def init_db():
     os.makedirs(os.path.dirname(DB), exist_ok=True)
     if not os.path.exists(DB) and os.path.exists(SEED):
@@ -83,11 +97,12 @@ def init_db():
         created_at TEXT DEFAULT CURRENT_TIMESTAMP);
     """)
     have = {r[1] for r in con.execute("PRAGMA table_info(places)")}
-    for col, typ in (("owner_id", "INTEGER"), ("status", "TEXT"), ("source", "TEXT")):
+    for col, typ in (("owner_id", "INTEGER"), ("status", "TEXT"), ("source", "TEXT"), ("ntext", "TEXT")):
         if col not in have:
             con.execute(f"ALTER TABLE places ADD COLUMN {col} {typ}")
     con.execute("CREATE INDEX IF NOT EXISTS places_ws ON places (wilaya, sector)")
     con.commit()
+    ensure_ntext(con)
     con.close()
 
 
@@ -130,38 +145,77 @@ def json_body():
 
 # ---------- الصفحات والبحث العام ----------
 @app.get("/")
-def index():
-    return send_from_directory(app.static_folder, "index.html")
+def landing():
+    return send_from_directory(app.static_folder, "landing.html")
+
+
+@app.get("/app")
+def web_app():
+    return send_from_directory(app.static_folder, "app.html")
 
 
 @app.get("/api/places")
 def places():
     a = request.args
-    where, p = ["(status IS NULL OR status='approved')"], []
+    con = db()
+    if con.execute("SELECT 1 FROM places WHERE ntext IS NULL LIMIT 1").fetchone():
+        ensure_ntext(con)
+    base, p = ["(status IS NULL OR status='approved')"], []
     if a.get("wilaya"):
-        where.append("wilaya=?")
+        base.append("wilaya=?")
         p.append(a["wilaya"].zfill(2))
     if a.get("sector"):
-        where.append("sector=?")
+        base.append("sector=?")
         p.append(a["sector"])
-    q = a.get("q", "").strip().lower()[:80]
-    if q:
-        like = f"%{q}%"
-        cond = ("(lower(name) LIKE ? OR lower(coalesce(name_ar,'')) LIKE ? OR lower(coalesce(name_fr,'')) LIKE ? "
-                "OR lower(coalesce(address,'')) LIKE ? OR lower(coalesce(subtype,'')) LIKE ?")
-        p += [like] * 5
-        subs = sorted({v for k, v in SYN.items() if k in q})
-        if subs:
-            cond += " OR subtype IN (%s)" % ",".join("?" * len(subs))
-            p += subs
-        where.append(cond + ")")
-    sql = f"SELECT {PUBLIC_COLS} FROM places WHERE " + " AND ".join(where) + " LIMIT 3000"
-    rows = [dict(r) for r in db().execute(sql, p)]
-    lat, lon = a.get("lat", type=float), a.get("lon", type=float)
-    if lat is not None and lon is not None:
+    q = a.get("q", "").strip()[:80]
+    qn, concepts, rest = parse(q) if q else ("", [], [])
+    cols = PUBLIC_COLS + ",ntext"
+
+    def fetch(extra=None, params=()):
+        w = base + ([extra] if extra else [])
+        return [dict(r) for r in con.execute(
+            f"SELECT {cols} FROM places WHERE " + " AND ".join(w) + " LIMIT 6000", p + list(params))]
+
+    related = False
+    if concepts:
+        secs = sorted({c[0] for c in concepts})
+        rows = fetch("sector IN (%s)" % ",".join("?" * len(secs)), secs)
+        specific = any(c[1] is not None for c in concepts)
+        need = 6 if specific else 2
         for r in rows:
+            r["_s"] = score(r["sector"], r["subtype"], r["ntext"], concepts)
+        hits = [r for r in rows if r["_s"] >= need]
+        if not hits and rows:   # لا تطابق دقيق: نعرض نتائج ذات صلة من نفس القطاع
+            hits = [r for r in rows if r["_s"] >= 2] or rows
+            related = True
+        if sum(1 for c in concepts if c[1] is not None) >= 2 and hits and not related:
+            top = max(r["_s"] for r in hits)   # أكثر من تخصص: نبقي الأدق فقط
+            hits = [r for r in hits if r["_s"] >= top]
+        rows = hits
+        for r in rows:
+            r["_s"] += 3 * sum(1 for w in rest if w in r["ntext"])
+    elif q:
+        toks = [w for w in qn.split() if w not in ("",)]
+        rows = fetch(" AND ".join("ntext LIKE ?" for _ in toks), [f"%{w}%" for w in toks]) if toks else []
+        if not rows and len(toks) > 1:
+            rows = fetch("(" + " OR ".join("ntext LIKE ?" for _ in toks) + ")", [f"%{w}%" for w in toks])
+        for r in rows:
+            r["_s"] = sum(1 for w in toks if w in r["ntext"])
+    else:
+        rows = fetch()
+        for r in rows:
+            r["_s"] = 0
+    lat, lon = a.get("lat", type=float), a.get("lon", type=float)
+    for r in rows:
+        r["_s"] += 1 if r["source"] == "owner" else 0
+        if lat is not None and lon is not None:
             r["km"] = round(hav(lat, lon, r["lat"], r["lon"]), 2)
-        rows.sort(key=lambda r: (r["source"] != "owner", r["km"]))
+        r.pop("ntext", None)
+        if related:
+            r["related"] = True
+    rows.sort(key=lambda r: (-r["_s"], r.get("km", 0)))
+    for r in rows:
+        r.pop("_s", None)
     return jsonify(rows[: min(a.get("limit", 50, type=int), 200)])
 
 
@@ -305,7 +359,7 @@ def edit_place(pid):
     d = clean(json_body())
     con = db()
     cur = con.execute("UPDATE places SET " + ",".join(f"{c}=?" for c in d) +
-                      ",status='pending' WHERE osm_id=? AND owner_id=?",
+                      ",status='pending',ntext=NULL WHERE osm_id=? AND owner_id=?",
                       list(d.values()) + [pid, u["id"]])
     con.commit()
     return jsonify(ok=True) if cur.rowcount else err("غير موجود", 404)

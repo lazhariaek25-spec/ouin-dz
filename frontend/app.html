@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>وين؟ DZ</title>
+<style>
+:root{--bg:#f6f8f7;--card:#fff;--ink:#14201b;--mut:#5b6b64;--line:#dfe7e3;--pri:#0b7a4b;--pri2:#e8f5ee;--acc:#d62f3a}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1512;--card:#16201b;--ink:#e8f0ec;--mut:#9ab0a6;--line:#263530;--pri:#3ddc97;--pri2:#173026;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;line-height:1.6}
+.w{max-width:900px;margin:0 auto;padding:0 16px 24px}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.logo{font-weight:800;font-size:1.5rem;color:var(--pri)}
+.lang button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:4px 10px;font:inherit;cursor:pointer}
+.lang button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+h1{font-size:clamp(1.4rem,5vw,2.2rem);line-height:1.25;margin:8px 0 4px}
+.sub{color:var(--mut);margin:0 0 14px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--line);padding:4px;border-radius:14px;margin-bottom:14px}
+.tabs button{border:0;background:transparent;color:var(--ink);border-radius:11px;padding:10px 6px;font:inherit;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--card);color:var(--pri)}
+h2{font-size:1.05rem;margin:16px 0 8px}
+.wil{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;max-height:230px;overflow:auto}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.wb,.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;font:inherit;cursor:pointer}
+.wb{padding:6px 4px;text-align:center;font-size:.9rem}
+.wb em{display:block;font-style:normal;font-weight:800;color:var(--pri)}
+.chip{padding:9px 10px;text-align:start}
+.on.wb,.on.chip,.wb:hover,.chip:hover{border-color:var(--pri);background:var(--pri2)}
+.q{display:flex;gap:8px;margin-bottom:8px}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit}
+.q button,.near{border:0;background:var(--pri);color:#fff;border-radius:12px;padding:0 16px;font:inherit;font-weight:600;cursor:pointer}
+.near{padding:8px 14px;margin:4px 0}
+.near.on{background:var(--acc)}
+.res{display:grid;gap:10px;margin-top:6px}
+.r{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.r b{display:block}.m{color:var(--mut);font-size:.9rem;display:block}
+.r a.go{white-space:nowrap;text-decoration:none;color:var(--pri);border:1px solid var(--pri);border-radius:10px;padding:6px 12px;font-weight:600}
+.m a{color:var(--pri)}
+.note,footer{font-size:.85rem;color:var(--mut)}
+footer{margin-top:24px;text-align:center}
+.hid{display:none}
+</style>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#0b7a4b"><link rel="apple-touch-icon" href="/icon-192.png">
+</head>
+<body>
+<div class="w">
+<header><div class="logo" id="brand"></div><div><button id="inst" style="display:none;border:1px solid var(--pri);background:transparent;color:var(--pri);border-radius:8px;padding:3px 10px;margin-inline-end:8px;font:inherit;cursor:pointer"></button><a href="/business.html" id="biz" style="color:var(--pri);margin-inline-end:10px;text-decoration:none"></a><span class="lang"><button data-l="ar">ع</button> <button data-l="fr">FR</button> <button data-l="en">EN</button></span></div></header>
+<h1 id="t1"></h1><p class="sub" id="t2"></p>
+<div class="tabs"><button id="tb1"></button><button id="tb2"></button></div>
+
+<div id="m1">
+<h2 id="h1"></h2><div class="wil" id="wil"></div>
+<h2 id="h2"></h2>
+<div class="q"><input id="sq"></div>
+<div class="chips" id="chips"></div>
+</div>
+<div id="m2" class="hid"><div class="q"><input id="s"></div></div>
+
+<button class="near" id="near"></button>
+<h2 id="h3"></h2><div class="res" id="res"></div>
+<footer id="ft"></footer>
+</div>
+
+<script>
+var L={
+ar:{rel:"لا نتائج مطابقة تماماً، هذه نتائج ذات صلة من نفس القطاع.",dir:"rtl",brand:"وين؟ DZ",t1:"كل ما تبحث عنه حولك، بذكاء.",t2:"اختر الولاية والقطاع، أو ابحث مباشرة عن اسم صاحب الخدمة.",tb1:"حسب الولاية والقطاع",tb2:"بحث عام بالاسم",h1:"1. اختر الولاية",h2:"2. اختر القطاع أو ابحث عن تخصص",ph1:"ابحث: طبيب، صيدلية، مستشفى، ميكانيكي، فندق…",ph2:"اسم المؤسسة أو الحرفي أو الخدمة…",all:"كل القطاعات",near:"📡 الأقرب إليّ",h3:"النتائج",loc:"📍 الموقع",none:"لا نتائج. تأكد أنك استوردت بيانات هذه الولاية.",p1:"اختر ولاية لعرض النتائج.",p2:"اكتب اسماً للبحث.",km:"كم",ft:"البيانات © مساهمو OpenStreetMap"},
+fr:{rel:"Aucune correspondance exacte ; voici des résultats proches du même secteur.",dir:"ltr",brand:"Ouin ? DZ",t1:"Tout ce que vous cherchez, autour de vous, intelligemment.",t2:"Choisissez la wilaya et le secteur, ou cherchez directement un nom.",tb1:"Par wilaya et secteur",tb2:"Recherche par nom",h1:"1. Wilaya",h2:"2. Secteur ou spécialité",ph1:"Cherchez : médecin, pharmacie, hôpital, garage, hôtel…",ph2:"Nom de l’établissement ou du service…",all:"Tous les secteurs",near:"📡 Près de moi",h3:"Résultats",loc:"📍 Position",none:"Aucun résultat. Avez-vous importé les données de cette wilaya ?",p1:"Choisissez une wilaya.",p2:"Saisissez un nom.",km:"km",ft:"Données © contributeurs OpenStreetMap"},
+en:{rel:"No exact match; showing related results from the same sector.",dir:"ltr",brand:"Win? DZ",t1:"Everything you look for, around you, intelligently.",t2:"Pick a wilaya and sector, or search a provider by name.",tb1:"By wilaya & sector",tb2:"Name search",h1:"1. Wilaya",h2:"2. Sector or specialty",ph1:"Search: doctor, pharmacy, hospital, mechanic, hotel…",ph2:"Business or service name…",all:"All sectors",near:"📡 Near me",h3:"Results",loc:"📍 Location",none:"No results. Did you import this wilaya’s data?",p1:"Pick a wilaya.",p2:"Type a name.",km:"km",ft:"Data © OpenStreetMap contributors"}};
+var S=[["health","🩺","الصحة","Santé","Health"],["shopping","🛍️","التجارة والتسوق","Commerce","Shopping"],["auto","🚗","النقل والسيارات","Auto et transport","Transport & cars"],["food","🍽️","المطاعم والترفيه","Restauration","Food & leisure"],["trades","🔧","الحرف والخدمات","Artisans","Trades"],["public","🏛️","الإدارات والمرافق","Administrations","Public services"],["education","🎓","التعليم والتكوين","Éducation","Education"],["realestate","🏠","العقارات والسكن","Immobilier","Real estate"],["sport","⚽","الرياضة والشباب","Sport et jeunesse","Sports & youth"],["finance","💳","المال والتأمين","Finance et assurance","Finance"],["agriculture","🌾","الفلاحة","Agriculture","Agriculture"],["tourism","🧳","السياحة والسفر","Tourisme","Tourism"]];
+var W="01|أدرار|Adrar;02|الشلف|Chlef;03|الأغواط|Laghouat;04|أم البواقي|Oum El Bouaghi;05|باتنة|Batna;06|بجاية|Béjaïa;07|بسكرة|Biskra;08|بشار|Béchar;09|البليدة|Blida;10|البويرة|Bouira;11|تمنراست|Tamanrasset;12|تبسة|Tébessa;13|تلمسان|Tlemcen;14|تيارت|Tiaret;15|تيزي وزو|Tizi Ouzou;16|الجزائر العاصمة|Alger;17|الجلفة|Djelfa;18|جيجل|Jijel;19|سطيف|Sétif;20|سعيدة|Saïda;21|سكيكدة|Skikda;22|سيدي بلعباس|Sidi Bel Abbès;23|عنابة|Annaba;24|قالمة|Guelma;25|قسنطينة|Constantine;26|المدية|Médéa;27|مستغانم|Mostaganem;28|المسيلة|M’Sila;29|معسكر|Mascara;30|ورقلة|Ouargla;31|وهران|Oran;32|البيض|El Bayadh;33|إليزي|Illizi;34|برج بوعريريج|Bordj Bou Arreridj;35|بومرداس|Boumerdès;36|الطارف|El Tarf;37|تندوف|Tindouf;38|تيسمسيلت|Tissemsilt;39|الوادي|El Oued;40|خنشلة|Khenchela;41|سوق أهراس|Souk Ahras;42|تيبازة|Tipaza;43|ميلة|Mila;44|عين الدفلى|Aïn Defla;45|النعامة|Naâma;46|عين تموشنت|Aïn Témouchent;47|غرداية|Ghardaïa;48|غليزان|Relizane;49|تيميمون|Timimoun;50|برج باجي مختار|Bordj Badji Mokhtar;51|أولاد جلال|Ouled Djellal;52|بني عباس|Béni Abbès;53|عين صالح|In Salah;54|عين قزام|In Guezzam;55|تقرت|Touggourt;56|جانت|Djanet;57|المغير|El M’Ghair;58|المنيعة|El Menia".split(";").map(function(x){return x.split("|")});
+var lg="ar",md=1,wi=null,sec=null,pos=null,tm=null,$=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function sl(x){return x[lg==="ar"?2:lg==="fr"?3:4]}
+function card(e){var t=L[lg],nm=lg==="ar"?(e.name_ar||e.name):(e.name_fr||e.name),
+u="https://www.openstreetmap.org/?mlat="+e.lat+"&mlon="+e.lon+"#map=18/"+e.lat+"/"+e.lon,
+s=S.filter(function(x){return x[0]===e.sector})[0];
+return '<div class="r"><div><b>'+esc(nm)+(e.source==="owner"?' <span style="color:var(--pri)">✔</span>':"")+'</b><span class="m">'+(s?s[1]+" "+sl(s):"")+" · "+esc(e.subtype)+(e.km!=null?" · "+e.km+" "+t.km:"")+'</span>'+
+(e.address?'<span class="m">'+esc(e.address)+'</span>':"")+
+(e.phone?'<span class="m"><a href="tel:'+esc(e.phone)+'">'+esc(e.phone)+'</a></span>':"")+
+(e.opening_hours?'<span class="m">🕒 '+esc(e.opening_hours)+'</span>':"")+
+'</div><a class="go" href="'+u+'" target="_blank" rel="noopener">'+t.loc+'</a></div>'}
+function show(h){$("res").innerHTML=h}
+function run(){var t=L[lg],p={limit:50};
+if(md===1){if(!wi){show('<p class="note">'+t.p1+'</p>');return}p.wilaya=wi;if(sec)p.sector=sec;p.q=$("sq").value.trim()}
+else{p.q=$("s").value.trim();if(!p.q){show('<p class="note">'+t.p2+'</p>');return}}
+if(pos){p.lat=pos[0];p.lon=pos[1]}
+fetch("/api/places?"+new URLSearchParams(p)).then(function(r){return r.json()}).then(function(d){
+if(d.error){show('<p class="note">'+esc(d.error)+'</p>');return}
+show(d.length?(d[0].related?'<p class="note">'+t.rel+'</p>':'')+d.map(card).join(""):'<p class="note">'+t.none+'</p>')}).catch(function(){show('<p class="note">API ✗</p>')})}
+function later(){clearTimeout(tm);tm=setTimeout(run,300)}
+function build(){var t=L[lg];document.documentElement.lang=lg;document.documentElement.dir=t.dir;document.title=t.brand;
+["brand","t1","t2","h1","h2","h3","ft"].forEach(function(k){$(k).textContent=t[k]});
+$("inst").textContent={ar:"📲 ثبّت التطبيق",fr:"📲 Installer",en:"📲 Install"}[lg];$("biz").textContent={ar:"🏢 للمؤسسات",fr:"🏢 Entreprises",en:"🏢 Business"}[lg];$("tb1").textContent=t.tb1;$("tb2").textContent=t.tb2;$("sq").placeholder=t.ph1;$("s").placeholder=t.ph2;$("near").textContent=t.near;
+$("tb1").className=md===1?"on":"";$("tb2").className=md===2?"on":"";$("m1").className=md===1?"":"hid";$("m2").className=md===2?"":"hid";
+$("near").className="near"+(pos?" on":"");
+$("wil").innerHTML=W.map(function(x){return '<button class="wb'+(wi===x[0]?' on':'')+'" data-c="'+x[0]+'"><em>'+x[0]+'</em>'+(lg==="ar"?x[1]:x[2])+'</button>'}).join("");
+$("chips").innerHTML='<button class="chip'+(sec===null?' on':'')+'" data-s="">🔎 '+t.all+'</button>'+S.map(function(x){return '<button class="chip'+(sec===x[0]?' on':'')+'" data-s="'+x[0]+'">'+x[1]+" "+sl(x)+'</button>'}).join("");
+document.querySelectorAll(".lang button").forEach(function(b){b.classList.toggle("on",b.dataset.l===lg)});run()}
+document.querySelectorAll(".lang button").forEach(function(b){b.onclick=function(){lg=b.dataset.l;build()}});
+$("tb1").onclick=function(){md=1;build()};$("tb2").onclick=function(){md=2;build()};
+$("wil").onclick=function(e){var b=e.target.closest(".wb");if(b){wi=b.dataset.c;build()}};
+$("chips").onclick=function(e){var b=e.target.closest(".chip");if(b){sec=b.dataset.s||null;build()}};
+$("sq").oninput=later;$("s").oninput=later;
+$("near").onclick=function(){if(pos){pos=null;build();return}
+navigator.geolocation&&navigator.geolocation.getCurrentPosition(function(g){pos=[g.coords.latitude,g.coords.longitude];build()})};
+var dp=null;window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;$("inst").style.display=""});$("inst").onclick=function(){if(dp){dp.prompt();dp=null;$("inst").style.display="none"}};
+build();
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>

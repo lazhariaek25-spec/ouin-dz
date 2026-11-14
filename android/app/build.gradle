@@ -1,0 +1,35 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'dz.ouin.app'
+    compileSdk 34
+    defaultConfig {
+        applicationId "dz.ouin.app"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+        // رابط المنصة العام يُمرَّر عند البناء (APP_URL)
+        resValue "string", "app_url", (System.getenv("APP_URL") ?: "https://example.com")
+    }
+    signingConfigs {
+        debug {
+            if (file("ouin.keystore").exists()) {
+                storeFile file("ouin.keystore")
+                storePassword "android"
+                keyAlias "ouin"
+                keyPassword "android"
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
