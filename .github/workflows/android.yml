@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       app_url:
-        description: "رابط المنصة العام (https://...)"
+        description: "رابط المنصة العام (https://cc5b1a998e3df4.app.lhr.life)"
         required: false
   push:
     paths: ["android/**", ".github/workflows/android.yml"]
