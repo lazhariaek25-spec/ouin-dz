@@ -10,11 +10,15 @@ SQLite:     python osm_import.py --wilaya 31 --sqlite ouin.db        (مناسب
 البيانات © مساهمو OpenStreetMap — ترخيص ODbL: يجب ذكر المصدر داخل المنصة.
 """
 import argparse
+import os
 import sqlite3
 import sys
 import time
 
 import requests
+
+TIMEOUT = int(os.environ.get("OSM_TIMEOUT", "240"))   # ثوانٍ لكل طلب
+ATTEMPTS = int(os.environ.get("OSM_ATTEMPTS", "2"))
 
 ENDPOINTS = [
     "https://overpass.private.coffee/api/interpreter",
@@ -78,10 +82,10 @@ def build_query(code, key):
 
 def fetch(query):
     headers = {"User-Agent": "ouin-dz/1.0 (https://github.com/lazhariaek25-spec/ouin-dz)", "Accept": "*/*"}
-    for attempt in range(2):
+    for attempt in range(ATTEMPTS):
         for url in ENDPOINTS:
             try:
-                r = requests.post(url, data={"data": query}, headers=headers, timeout=240)
+                r = requests.post(url, data={"data": query}, headers=headers, timeout=TIMEOUT)
                 if r.status_code == 200:
                     return r.json()["elements"]
                 print(f"    {url.split('/')[2]} -> HTTP {r.status_code}", file=sys.stderr)

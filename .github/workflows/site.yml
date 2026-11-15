@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       wilayas:
-        description: "رموز الولايات لتحديث بياناتها من OpenStreetMap (مفصولة بمسافة)"
+        description: "رموز ولايات لتحديثها من OpenStreetMap (اتركها فارغة لاستعمال البيانات المحفوظة). مثال: 16"
         required: false
-        default: "16 22 31"
+        default: ""
   push:
     branches: [main]
     paths: ["static_site/**", "tools/**", "backend/**", "android/**", ".github/workflows/site.yml", "data/osm_seed.db"]
@@ -22,6 +22,7 @@ concurrency:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - id: url
@@ -50,6 +51,7 @@ jobs:
     needs: apk
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -57,11 +59,13 @@ jobs:
       - run: pip install requests
       - name: بيانات OpenStreetMap
         env:
-          W: ${{ inputs.wilayas || '16 22 31' }}
+          W: ${{ inputs.wilayas }}
+          OSM_TIMEOUT: "45"
+          OSM_ATTEMPTS: "1"
         run: |
           if [ -f data/osm_seed.db ]; then cp data/osm_seed.db data/ouin.db; fi
           for c in $W; do
-            python backend/osm_import.py --wilaya "$c" --sqlite data/ouin.db || echo "تعذر تحديث الولاية $c"
+            timeout 25m python backend/osm_import.py --wilaya "$c" --sqlite data/ouin.db || echo "تعذر تحديث الولاية $c"
           done
       - run: python tools/build_site.py
       - name: إضافة APK
