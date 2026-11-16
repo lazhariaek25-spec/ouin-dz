@@ -8,7 +8,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "backend"))
-from search import CONCEPTS, STOP  # noqa: E402
+from search import CONCEPTS, STOP, is_security  # noqa: E402
 
 DB = os.environ.get("OUIN_DB", os.path.join(ROOT, "data", "ouin.db"))
 OUT = os.path.join(ROOT, "_site")
@@ -27,6 +27,7 @@ if "source" in have:
     where.append("(source IS NULL OR source!='owner')")
 rows = con.execute(f"SELECT {COLS} FROM places WHERE {' AND '.join(where)} ORDER BY wilaya, sector, name").fetchall()
 
+rows = [r for r in rows if not is_security(r[3], " ".join(x or "" for x in r[4:7]))]
 by = {}
 for r in rows:
     by.setdefault(r[1], []).append(list(r))

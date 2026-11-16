@@ -17,6 +17,8 @@ import time
 
 import requests
 
+from search import is_security
+
 TIMEOUT = int(os.environ.get("OSM_TIMEOUT", "240"))   # ثوانٍ لكل طلب
 ATTEMPTS = int(os.environ.get("OSM_ATTEMPTS", "2"))
 
@@ -35,7 +37,7 @@ TAGS = {
         "restaurant": "food", "cafe": "food", "fast_food": "food",
         "fuel": "auto", "bank": "finance", "bureau_de_change": "finance",
         "school": "education", "university": "education", "college": "education",
-        "townhall": "public", "post_office": "public", "police": "public", "veterinary": "agriculture", "marketplace": "shopping", "kindergarten": "education", "driving_school": "education",
+        "townhall": "public", "post_office": "public", "veterinary": "agriculture", "marketplace": "shopping", "kindergarten": "education", "driving_school": "education",
     },
     "shop": {
         "car_repair": "auto", "car_parts": "auto", "supermarket": "shopping",
@@ -117,6 +119,8 @@ def to_rows(elements, code):
         sector, subtype = classify(tags)
         if not sector:
             continue
+        if is_security(subtype, " ".join(filter(None, [name, tags.get("name:ar"), tags.get("name:fr")]))):
+            continue   # المؤسسات الأمنية مستبعدة
         addr = " ".join(
             x for x in (tags.get("addr:housenumber"), tags.get("addr:street"),
                         tags.get("addr:city")) if x

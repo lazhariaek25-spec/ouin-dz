@@ -35,7 +35,6 @@ RAW = [
  ("public", "", "ادارة|مرفق|administration|service public|public"),
  ("public", "townhall", "بلدية|دائرة|mairie|apc|daira|townhall|town hall"),
  ("public", "post_office", "بريد|poste|post office|post|barid|ccp"),
- ("public", "police", "شرطة|درك|امن|commissariat|police|gendarmerie|surete"),
  # --- المطاعم والترفيه ---
  ("food", "", "مطاعم|اكل|اكلات|ترفيه|restauration|manger|food|dining|loisirs"),
  ("food", "restaurant,fast_food", "مطعم|restaurant|resto|pizzeria|traiteur"),
@@ -120,3 +119,16 @@ def score(sector, subtype, ntext, concepts):
         elif sector == sec and any(len(t) >= 4 and t in ntext for t in terms):
             total += 6
     return total
+
+
+# المؤسسات الأمنية (شرطة، درك، جيش، سجون...) مستبعدة من المنصة كلياً
+_SEC_SUB = tuple(norm(x) for x in ("شرطة", "جندرمة", "gendarmerie", "commissariat", "police", "sûreté",
+                                   "caserne", "militaire", "military", "ثكنة", "سجن", "prison", "الدرك", "الجيش"))
+_SEC_TOK = {norm(x) for x in ("أمن", "الأمن", "درك", "جيش", "armée", "army", "sûreté")}
+
+
+def is_security(subtype, text=""):
+    if subtype == "police":
+        return True
+    t = norm(text)
+    return any(w in t for w in _SEC_SUB) or any(w in _SEC_TOK for w in t.split())

@@ -10,7 +10,7 @@ import time
 from flask import Flask, jsonify, request, send_from_directory, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from search import norm, parse, score
+from search import is_security, norm, parse, score
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB = os.environ.get("OUIN_DB", os.path.join(ROOT, "data", "ouin.db"))
@@ -173,8 +173,10 @@ def places():
 
     def fetch(extra=None, params=()):
         w = base + ([extra] if extra else [])
-        return [dict(r) for r in con.execute(
+        got = [dict(r) for r in con.execute(
             f"SELECT {cols} FROM places WHERE " + " AND ".join(w) + " LIMIT 6000", p + list(params))]
+        return [r for r in got if not is_security(
+            r["subtype"], " ".join(str(r[k] or "") for k in ("name", "name_ar", "name_fr")))]
 
     related = False
     if concepts:
